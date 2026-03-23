@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>바디프로필 위젯</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+
+body {
+  min-height: 100vh;
+  background: #0c0c0e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* ── 위젯 외곽 ── */
+.widget {
+  width: 329px;
+  height: 155px;
+  background: #1c1c1e;
+  border-radius: 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  overflow: hidden;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.5),
+    0 16px 48px rgba(0,0,0,.7),
+    inset 0 0.5px 0 rgba(255,255,255,.06);
+}
+
+/* ── 각 셀 ── */
+.cell {
+  padding: 13px 14px 11px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.cell-br { border-right:  0.5px solid rgba(255,255,255,.07); }
+.cell-bb { border-bottom: 0.5px solid rgba(255,255,255,.07); }
+
+/* 배경 컬러 */
+.c1 { background: linear-gradient(145deg,#1c1c1e,#23231a); }
+.c2 { background: linear-gradient(145deg,#1c1c1e,#1a1c23); }
+.c3 { background: linear-gradient(145deg,#1c1c1e,#1a231a); }
+.c4 { background: linear-gradient(145deg,#1c1c1e,#231e1a); }
+
+/* 은은한 글로우 */
+.cell::after {
+  content:'';
+  position:absolute;
+  width:90px; height:90px;
+  border-radius:50%;
+  filter:blur(28px);
+  pointer-events:none;
+  opacity:.10;
+}
+.c1::after { background:#d4ff00; top:-30px; right:-20px; }
+.c2::after { background:#6b8cff; top:-30px; left:-20px;  }
+.c3::after { background:#3ddc84; bottom:-30px; right:-20px; }
+.c4::after { background:#ff8c42; bottom:-30px; left:-20px;  }
+
+/* 라벨 */
+.lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.28);
+}
+
+/* 메인 숫자 */
+.big {
+  font-family: 'Black Han Sans', sans-serif;
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+.big-xl  { font-size: 40px; color: #e4ff3d; }
+.big-lg  { font-size: 30px; }
+.big-md  { font-size: 20px; line-height: 1.2; letter-spacing: -.5px; }
+
+.unit {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0;
+  color: rgba(255,255,255,.28);
+}
+
+/* 보조 텍스트 */
+.sub {
+  font-size: 10px;
+  color: rgba(255,255,255,.28);
+  letter-spacing: -.2px;
+  margin-top: 1px;
+}
+
+/* 남은 kg 뱃지 */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(228,255,61,.1);
+  border: 0.5px solid rgba(228,255,61,.22);
+  border-radius: 5px;
+  padding: 1.5px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(228,255,61,.65);
+  letter-spacing: .2px;
+  width: fit-content;
+  margin-top: 3px;
+}
+
+/* 주간 도트 */
+.dots {
+  display: flex;
+  gap: 3.5px;
+  margin-top: 6px;
+}
+.d {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.07);
+}
+.d-done  { background: #3ddc84; box-shadow: 0 0 5px rgba(61,220,132,.45); }
+.d-today { background: rgba(61,220,132,.25); border: 1px solid rgba(61,220,132,.5); }
+.d-plan  { background: rgba(255,255,255,.15); }
+.d-rest  { background: rgba(255,255,255,.04); }
+
+/* 페이드인 */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(5px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.cell { animation: fadeUp .35s ease both; }
+.cell:nth-child(1){ animation-delay:.00s; }
+.cell:nth-child(2){ animation-delay:.07s; }
+.cell:nth-child(3){ animation-delay:.14s; }
+.cell:nth-child(4){ animation-delay:.21s; }
+</style>
+</head>
+<body>
+<div class="widget">
+
+  <!-- ① 체중 + 목표까지 남은 kg -->
+  <div class="cell c1 cell-br cell-bb">
+    <div class="lbl">체중</div>
+    <div>
+      <div class="big big-xl" id="w-cur">—<span class="unit">kg</span></div>
+      <div class="pill" id="w-pill">▾ —kg 남음</div>
+    </div>
+  </div>
+
+  <!-- ② 오늘 운동 종목 -->
+  <div class="cell c2 cell-bb">
+    <div class="lbl">오늘 운동</div>
+    <div>
+      <div class="big big-md" id="w-name" style="color:#8fa8ff;">—</div>
+      <div class="sub" id="w-sub">—</div>
+    </div>
+  </div>
+
+  <!-- ③ 이번 주 운동 달성 -->
+  <div class="cell c3 cell-br">
+    <div class="lbl">이번 주</div>
+    <div>
+      <div style="display:flex;align-items:baseline;gap:3px;">
+        <span class="big big-lg" id="w-wk" style="color:#3ddc84;">0</span>
+        <span class="unit">/4회</span>
+      </div>
+      <div class="dots" id="w-dots"></div>
+    </div>
+  </div>
+
+  <!-- ④ 연속 달성 스트릭 -->
+  <div class="cell c4">
+    <div class="lbl">연속 달성 🔥</div>
+    <div>
+      <div style="display:flex;align-items:baseline;gap:3px;">
+        <span class="big big-lg" id="w-str" style="color:#ff8c42;">0</span>
+        <span class="unit">일</span>
+      </div>
+      <div class="sub" id="w-str-sub" style="color:rgba(255,140,66,.5);">오늘부터 시작!</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const START_WEIGHT = 84.8;
+const GOAL_WEIGHT  = 75.0;
+const GYM_DAYS     = new Set([0,1,3,5]); // Sun Mon Wed Fri
+
+const INFO = {
+  0:{ name:'하체 유지',   sub:'레그프레스 · 인클라인 워킹' },
+  1:{ name:'가슴 + 삼두', sub:'체스트프레스 · 펙덱플라이'  },
+  2:{ name:'홈트 · 계단', sub:'팔굽혀펴기 · 철봉'          },
+  3:{ name:'등 + 이두',   sub:'렛풀다운 · 케이블 로우'      },
+  4:{ name:'홈트 · 계단', sub:'팔굽혀펴기 · 철봉'          },
+  5:{ name:'어깨 + 복근', sub:'숄더프레스 · 레터럴 레이즈'  },
+  6:{ name:'완전 휴식',   sub:'치팅 or 가벼운 산책'         },
+};
+
+const dk = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const gl = () => { try{ return JSON.parse(localStorage.getItem('bp_logs')||'{}'); }catch{return{};} };
+const gc = () => { try{ return JSON.parse(localStorage.getItem('bp_checks')||'{}'); }catch{return{};} };
+
+function render(){
+  const now  = new Date();
+  const dow  = now.getDay();
+  const td   = dk(now);
+  const logs = gl();
+  const chks = gc();
+
+  /* ① 체중 */
+  const wks = Object.keys(logs).filter(k=>logs[k]?.weight).sort();
+  const cur = wks.length ? logs[wks[wks.length-1]].weight : START_WEIGHT;
+  const rem = (cur - GOAL_WEIGHT).toFixed(1);
+
+  document.getElementById('w-cur').innerHTML = `${cur}<span class="unit">kg</span>`;
+  const pill = document.getElementById('w-pill');
+  pill.textContent = `▾ ${rem}kg 남음`;
+  if(parseFloat(rem) <= 2){ pill.style.color='rgba(61,220,132,.75)'; pill.style.borderColor='rgba(61,220,132,.25)'; }
+
+  /* ② 오늘 운동 */
+  const info = INFO[dow];
+  const tc   = chks[td]||{};
+  const done = tc.gym||tc.home;
+  const nameEl = document.getElementById('w-name');
+  nameEl.textContent = info.name;
+  if(done){ nameEl.style.color='#3ddc84'; document.getElementById('w-sub').textContent='✓ 완료'; document.getElementById('w-sub').style.color='rgba(61,220,132,.5)'; }
+  else { document.getElementById('w-sub').textContent = info.sub; }
+
+  /* ③ 이번 주 */
+  const mon = new Date(now);
+  mon.setDate(now.getDate()-((dow+6)%7));
+  mon.setHours(0,0,0,0);
+
+  let gymCnt = 0;
+  const dotClasses = [];
+  for(let i=0;i<7;i++){
+    const d2 = new Date(mon); d2.setDate(mon.getDate()+i);
+    const k2 = dk(d2);
+    const c2 = chks[k2]||{};
+    const isGym = GYM_DAYS.has(d2.getDay());
+    const isToday = k2===td;
+    const gymDone = c2.gym||c2.home;
+    if(gymDone) gymCnt++;
+
+    if(gymDone)       dotClasses.push('d d-done');
+    else if(isToday && isGym) dotClasses.push('d d-today');
+    else if(isGym)    dotClasses.push('d d-plan');
+    else              dotClasses.push('d d-rest');
+  }
+
+  const wkEl = document.getElementById('w-wk');
+  wkEl.textContent = gymCnt;
+  wkEl.style.color = gymCnt>=4 ? '#e4ff3d' : '#3ddc84';
+  document.getElementById('w-dots').innerHTML = dotClasses.map(c=>`<div class="${c}"></div>`).join('');
+
+  /* ④ 스트릭 */
+  let streak=0, chkD=new Date(now); chkD.setHours(0,0,0,0);
+  for(let i=0;i<365;i++){
+    const k3=dk(chkD), e=logs[k3], c3=chks[k3]||{};
+    if(e?.weight||Object.values(c3).some(Boolean)){ streak++; chkD.setDate(chkD.getDate()-1); } else break;
+  }
+  document.getElementById('w-str').textContent = streak;
+  const subs=['오늘부터 시작!','조금씩 쌓여요 💪','잘 하고 있어요!','일주일 돌파! 🎉','습관이 됐어요','진짜 대단해! 🏆'];
+  const si = streak===0?0:streak<3?1:streak<7?2:streak<14?3:streak<30?4:5;
+  document.getElementById('w-str-sub').textContent = subs[si];
+}
+
+render();
+setInterval(render, 60000);
+</script>
+</body>
+</html>
